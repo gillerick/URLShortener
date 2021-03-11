@@ -4,7 +4,6 @@ package main
 import (
 	"URLShortener/models"
 	"database/sql"
-	"database/sql/driver"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -67,15 +66,37 @@ func (driver *DBClient) GenerateShortURL(w http.ResponseWriter, r *http.Request)
 
 }
 func main()  {
-	db, err = models.InitDB()
+	db, err := models.InitDB()
+	if err != nil{
+		panic(err)
+	}
+	dbclient := &DBClient{db: db}
+	if err != nil{
+		panic(err)
+	}
+	defer db.Close()
+	//Create a new router
+	r := mux.NewRouter()
+	//Attach an elegant path with a handler
+	r.HandleFunc("/v1/short/{encoded_string: [a-zA-Z0-9] * ",
+		dbclient.GetOriginalURL).Methods("GET")
+	r.HandleFunc("/v1/short", dbclient.GenerateShortURL).Methods("POST")
+	srv := &http.Server{
+		Handler:           r,
+		Addr:              "127.0.0.1:8000",
+		//It is a good practice to enforce timeouts for servers
+		WriteTimeout:      15 * time.Second,
+		ReadTimeout:       15 * time.Second,
+	}
+	log.Fatal(srv.ListenAndServe())
 
 
 
 	//Test unit
-	x := 100
-	base62String := base62.ToBase62(x)
-	log.Println(base62String)
-	normalNumber := base62.ToBase10(base62String)
-	log.Println(normalNumber)
+	//x := 100
+	//base62String := base62.ToBase62(x)
+	//log.Println(base62String)
+	//normalNumber := base62.ToBase10(base62String)
+	//log.Println(normalNumber)
 
 }
