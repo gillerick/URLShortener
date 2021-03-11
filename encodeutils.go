@@ -1,6 +1,7 @@
-package URLShortener
+package main
 
 import (
+	"log"
 	"math"
 	"strings"
 )
@@ -31,5 +32,14 @@ func ToBase10(str string) int{
 		res = (b * res) + strings.Index(base, string(r))
 	}
 	return res
+
+}
+
+func main()  {
+	x := 100
+	base62String := ToBase62(x)
+	log.Println(base62String)
+	normalNumber := ToBase10(base62String)
+	log.Println(normalNumber)
 
 }
