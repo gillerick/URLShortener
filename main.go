@@ -3,6 +3,7 @@ package main
 
 import (
 	"database/sql"
+	"database/sql/driver"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -46,6 +47,24 @@ func (driver *DBClient) GetOriginalURL(w http.ResponseWriter, r *http.Request) {
 
 }
 
+
+//GetShortURL adds URL to DB and gives back shortened string
+func (driver *DBClient) GenerateShortURL(w http.ResponseWriter, r *http.Request) {
+	var id int
+	var record Record
+	postBody, _ := ioutil.ReadAll(r.Body)
+	json.Unmarshal(postBody, &record)
+	err := driver.db.QueryRow("INSERT INTO web_url(url) VALUES($1) RETURNING id", record.URL).Scan(&id)
+	responseMap := map[string]interface{}{"encoded_string":base62.ToBase62(id)}
+	if err != nil{
+		w.Write([]byte(err.Error()))
+	}else {
+		w.Header().Set("Content-Type", "application/json")
+		response, _ := json.Marshal(responseMap)
+		w.Write(response)
+	}
+
+}
 func main()  {
 	x := 1000
 	base62String := base62.ToBase62(x)
