@@ -2,6 +2,7 @@ package main
 
 
 import (
+	"URLShortener/models"
 	"database/sql"
 	"database/sql/driver"
 	"encoding/json"
@@ -66,7 +67,12 @@ func (driver *DBClient) GenerateShortURL(w http.ResponseWriter, r *http.Request)
 
 }
 func main()  {
-	x := 1000
+	db, err = models.InitDB()
+
+
+
+	//Test unit
+	x := 100
 	base62String := base62.ToBase62(x)
 	log.Println(base62String)
 	normalNumber := base62.ToBase10(base62String)
